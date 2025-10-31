@@ -2,9 +2,9 @@
 ;nombre: p1.asm
 ;Propósito: comprobar si dos numeros son amigos
 ;fecha de creación:9/10/2025
-;fecha de modi:	   9/10/2025
-;compilacion       nasm -f elf32 p1.asm 
-;                  ld -m elf_i386 -s -o p1 p1.o io.o
+;fecha de modi:	   30/10/2025
+;compilacion       nasm -f elf32 p22.asm 
+;                  ld -m elf_i386 -s -o p22 p22.o io.o
 
 ;teoricamente ya está pero falta comprobar
 
@@ -19,6 +19,9 @@ section .data
 	strSumaB: db "Suma de los divisores propios de B::",0
 	strAmigos: db "Son amigos!",10,0
 	strNoAmigos: db "No son amigos!",10,0
+	strResultados: db "Mostrando resultados::",10,0
+	strIzquierdo: db "[",0
+	strDerecho: db "]:",0
 	strPares: db " -> ",0
     salto: db 10,0
 
@@ -26,6 +29,7 @@ section .data
 	suma: dd 0
 	cont: dd 0
 	temp: dd 0
+    temp2: dd 0
 	n: dd 0
 	contador: dd 0
 section .text
@@ -40,45 +44,54 @@ PutStr strIngresoN
 GetLInt eax
 mov [n],eax
 
+PutStr strResultados
+
 mov eax,220 ; primer numero a probar
 
 primerCiclo:
-	mov ebx,eax
-	inc ebx
-segundoCiclo:
-	;comprobar si ya se llegó al final
-	
 	mov ecx, [contador]
-    cmp ecx, [n]
-    jge fin
+	cmp ecx,[n]
+	JE fin
+	;sino->continuar
+	push eax; guardo el valor original
+    mov ebx,eax
+    call sumaDivisoresPropios
+    mov ecx,[suma]; divisores de eax
+	mov [temp],ecx
+	pop eax
+	;descarto numeros perfectos
+	cmp eax,ecx
+	JGE noSon1
 	;
-	call sonAmigos
-	CMP byte [flag] ,1
-	JNE noAmigos
-	;si son amigos imprimo los valores
-	PutLInt eax
-	PutStr strPares
-	PutLInt ebx
-	nwln
-	;inc eax
-	mov eax,ebx
-	mov ecx, [contador]
-    inc ecx
-    mov [contador], ecx
-	jmp primerCiclo
+	push eax
+	mov eax,ecx
+	call sumaDivisoresPropios 
+    mov ecx,[suma]; divisores de eax
+	;mov [temp],ecx
+	pop eax
+	cmp ecx,eax
+	JE siSon
+    ;calcular una ves los divisores de eax
 
-	noAmigos:
-		inc ebx
-		cmp ebx,65535
-		JL continuarBuscando
-		PutStr strNoAmigos
-		PutLInt eax
-		nwln
+	noSon1:
 		inc eax
 		jmp primerCiclo
-		continuarBuscando:
-		jmp segundoCiclo
 
+	siSon:;se imprime la pareja
+		mov ecx, [contador]
+		inc ecx
+		mov [contador], ecx
+		PutStr strIzquierdo
+		PutLInt ecx
+		PutStr strDerecho
+		PutLInt eax
+		PutStr strPares
+		PutLInt [temp]
+		nwln
+		;
+		;mov eax,[temp]
+		inc eax
+		jmp primerCiclo
 
 fin:
 	mov eax, 01
@@ -150,7 +163,3 @@ sonAmigos:
 		
 	final:
 	ret
-
-
-
-

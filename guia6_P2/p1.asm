@@ -12,7 +12,7 @@
 section .data
 	strProposito: db "Módulo que encuentra los n primeros numeros primos",10,0
 	strIngreso: db "Ingrese el valor de N::",0
-	strResultado: db "Mostrando resulatados::",10,0
+	strResultado: db "El n-esimo primo es::",10,0
 	strLimite: db "Límite de 32 bits excedido",10,0
 	strPrimo: db "Si es primo",10,0
 	strNoPrimo: db "No es primo",10,0
@@ -103,12 +103,14 @@ nPrimos:
 	jmp continuar1
 	siEs:
 	inc dword [n]
-	PutLInt eax
-	nwln
+	;PutLInt eax
+	;nwln
 
 	continuar1:
 		inc eax
 		CMP dword [n],ebx
 		JL bucle
-
+	dec eax
+	PutLInt eax
+	nwln
 ret
