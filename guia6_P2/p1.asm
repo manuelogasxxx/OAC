@@ -1,6 +1,6 @@
 ;Autor: Manuel Fernández Mercado
 ;nombre: p1.asm
-;Propósito: obtener los n primeros numeros primos
+;Propósito: Módulo que encuentra el n-esimo numero primo
 ;fecha de creación:9/10/2025
 ;fecha de modi:	   9/10/2025
 ;compilacion       nasm -f elf32 p1.asm 
@@ -10,7 +10,7 @@
 %include "io.mac"
 
 section .data
-	strProposito: db "Módulo que encuentra los n primeros numeros primos",10,0
+	strProposito: db "Módulo que encuentra el n-esimo numero primo",10,0
 	strIngreso: db "Ingrese el valor de N::",0
 	strResultado: db "El n-esimo primo es::",10,0
 	strLimite: db "Límite de 32 bits excedido",10,0

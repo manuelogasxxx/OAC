@@ -1,10 +1,10 @@
 ;Autor: Manuel Fernández Mercado
-;nombre: p1.asm
+;nombre: p2.asm
 ;Propósito: comprobar si dos numeros son amigos
 ;fecha de creación:9/10/2025
 ;fecha de modi:	   9/10/2025
-;compilacion       nasm -f elf32 p1.asm 
-;                  ld -m elf_i386 -s -o p1 p1.o io.o
+;compilacion       nasm -f elf32 p2.asm 
+;                  ld -m elf_i386 -s -o p2 p2.o io.o
 
 ;teoricamente ya está pero falta comprobar
 

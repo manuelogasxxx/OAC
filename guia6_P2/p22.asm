@@ -1,6 +1,6 @@
 ;Autor: Manuel Fernández Mercado
-;nombre: p1.asm
-;Propósito: comprobar si dos numeros son amigos
+;nombre: p22.asm
+;Propósito: Módulo que encuentra los n primeros números amigos
 ;fecha de creación:9/10/2025
 ;fecha de modi:	   30/10/2025
 ;compilacion       nasm -f elf32 p22.asm 

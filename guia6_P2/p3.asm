@@ -36,16 +36,14 @@ global _start
 _start:
     PutStr strProposito
     call leerMatriz
-    
     call principal
 
+fin:
     mov eax, 1
     mov ebx, 0
     int 80h
 
-
-
-
+;esta función pone los indices de una matriz
 indices:
 	PutStr strIzquierdo
 	PutInt [i]
@@ -54,10 +52,6 @@ indices:
 	PutStr strDerecho
 ret
 
-
-
-
-;---------------------------------------------
 leerMatriz:
     PutStr strIngresoM
     GetInt word[m]
@@ -65,7 +59,7 @@ leerMatriz:
     GetInt word[n]
     PutStr strIngreseMatriz
 
-    mov eax, 0          ; índice lineal
+    mov eax, 0
     mov ebx, matriz
     mov word[i], 0
 
@@ -86,14 +80,10 @@ bucleColumnasM1:
     mov cx, word[i]
     cmp cx, word[m]
     jb bucleFilasM1
+ret
 
-    ret
 
-
-;---------------------------------------------
-; esAbundante(eax = número)
-; Devuelve flag = 1 si abundante, 0 si no
-;---------------------------------------------
+;parámetro en eax, retorna flag 0,1
 esAbundante:
     push eax
     push ebx
@@ -135,27 +125,21 @@ salir:
     pop eax
     ret
 
-
-
-;---------------------------------------------
 principal:
 	PutStr strResultado
-    mov ebx, matriz      ; dirección de la matriz
+    mov ebx, matriz
     mov word[i], 0
-    mov eax, 0           ; índice lineal
+    mov eax, 0
 
 bucleFilasSuma:
     mov word[j], 0
 bucleColumnasSuma:
-    ; Obtener elemento matriz usando índice lineal
     mov cx, [ebx + eax*2]
     movsx ecx, cx        ; extender a 32 bits
-    
-    ; Preparar parámetro para esAbundante
+    ;
     push eax             ; guardar índice lineal
     mov eax, ecx         ; eax = número a verificar
     
-    ; Llamar a esAbundante
     call esAbundante
     
     ; Mostrar resultados
@@ -165,32 +149,30 @@ bucleColumnasSuma:
     je esAb
         ;PutStr strNoAbundante
     jmp sig
-esAb:
-	mov dword [flag1],1
-    call indices
-    PutInt ax
-    PutStr strSiAbundante
-sig:
-    nwln
-    
-    pop eax              ; recuperar índice lineal
-    inc eax              ; siguiente elemento
+    esAb:
+        mov dword [flag1],1
+        call indices
+        PutInt ax
+        PutStr strSiAbundante
+        nwln
+    sig:
+        ;nwln        
+        pop eax              ; recuperar índice lineal
+        inc eax              ; siguiente elemento
+        inc word[j]
+        mov cx, word[j]
+        cmp cx, word[n]
+        jb bucleColumnasSuma
 
-    inc word[j]
-    mov cx, word[j]
-    cmp cx, word[n]
-    jb bucleColumnasSuma
+        inc word[i]
+        mov cx, word[i]
+        cmp cx, word[m]
+        jb bucleFilasSuma
 
-    inc word[i]
-    mov cx, word[i]
-    cmp cx, word[m]
-    jb bucleFilasSuma
-
-	cmp dword [flag1],0
-	je noEncontrados
-	jmp finaal
-	noEncontrados:
-		PutStr strNoHay
-
-	finaal:
-    ret
+        cmp dword [flag1],0
+        je noEncontrados
+        jmp finaal
+        noEncontrados:
+            PutStr strNoHay
+        finaal:
+        ret

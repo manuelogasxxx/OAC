@@ -1,25 +1,23 @@
 ;Autor: Manuel Fernández Mercado
 ;nombre: p1.asm
-;Propósito: obtener los n primeros numeros primos
+;Propósito: calcular la suma de los primos de un arreglo de 20 elementos
 ;fecha de creación:9/10/2025
 ;fecha de modi:	   9/10/2025
 ;compilacion       nasm -f elf32 p1.asm 
 ;                  ld -m elf_i386 -s -o p1 p1.o io.o
-
-
 %include "io.mac"
-
-
 section .data
     strProposito: db "Prog que calcula la suma de los primos en un arreglo de 20 elementos",10,0
-    strIngreso:   db "Ingrese los valores del arreglo "
-    strResultado: db "La suma es::",0
+    strIngreso:   db "Ingrese los valores del arreglo ",0
+    strResultado: db "La suma es:: ",0
     strIzquierda: db "[",0
     strDerecha:   db "]:",0
-
+    strMas: db "+",0
+    strIgual: db "=",0
 	temp: dd 0
 	flag: dd 0
 	suma: dd 0
+    cont: dd 0
 
 section .bss
 	nroElementos resd 1
@@ -34,6 +32,7 @@ _start:
 PutStr strProposito
 call leer_datos
 ;aqui inicia el programa:
+PutStr strResultado
 xor esi,esi
 mov ecx,20
 
@@ -50,17 +49,23 @@ bucle:
 		;
 		mov edx, [vector + esi*4]
 		add [suma],edx
+        cmp dword[cont],0
+        JE continuar1
+        PutStr strMas
+        continuar1:
 		PutLInt edx
+        add dword[cont],1
 		jmp siguiente
 	siguiente:
 		inc esi
 		dec ecx
 		JNZ bucle
-
-PutStr strResultado
+cmp dword[cont],0
+JE casoEspecial
+PutStr strIgual
+casoEspecial:
 PutLInt [suma]
-
-
+nwln
 
 
 fin:
@@ -72,6 +77,7 @@ fin:
 ;lectura de arreglo (sin paso de parametros)
 leer_datos:
 	PutStr strIngreso
+    nwln
 	XOR ESI,ESI
 	MOV ECX,20
 leer_siguiente:
@@ -90,8 +96,8 @@ leer_siguiente:
 ;modificarlo para que agarre desde la pila
 esPrimo:
     enter 0, 0
+    ;inicializar variable que contabiliza los divisores
     mov dword [temp], 0
-    
     ; Preservar registros
     push eax
     push ebx
@@ -130,7 +136,7 @@ esPrimo:
         jmp sumar_divisores
                             
     comprobacion:
-    ; Un número primo tiene exactamente 1 divisor (además de 1 y sí mismo)
+   
     cmp dword [temp], 1
     je verdadero
     

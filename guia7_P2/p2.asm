@@ -19,7 +19,7 @@ section .data
     strIngresoM: db "Ingrese M::",0
     strIngresoN: db "Ingrese N::",0
     strIngreseMatriz: db "Ingrese los valores de la matriz",10,0
-    strResultado: db "mostrando los resultados",10,0
+    strResultado: db "mostrando los resultados (Progresion de cuadrados)",10,0
     strProgresion: db "Progresión de la suma de cuadrados de cada digito",10,0
     suma: dd 0
     aux: dd 0
@@ -85,6 +85,8 @@ bucleColumnasM1:
     jb bucleFilasM1
 
     ret
+
+;esta función retorna la suma de los cuadrados de los dígitos del número que le pases
 funcion:
     enter 0,0
     push ebx 
@@ -115,7 +117,7 @@ funcion:
         jmp bucle
 
     salir:
-    nwln
+    ;nwln
     PutLInt [suma]
     nwln
     mov eax,[suma]
@@ -140,13 +142,15 @@ esFeliz:
         jmp comprobacion
 
     siEs:
-        nwln
+        ;nwln
         PutStr strFeliz
+        nwln
         jmp final
 
     noEs:
-        nwln
+        ;nwln
         PutStr strInfeliz
+        nwln
         jmp final
     
     final:
@@ -172,10 +176,10 @@ bucleColumnasSuma:
     call indices
     PutLInt ecx
     nwln
-    PutStr strProgresion
+    ;PutStr strProgresion
     push eax
     push ebx
-    push ecx
+    push ecx             ;paso del parámetro  
     call esFeliz
     pop ebx
     pop eax
