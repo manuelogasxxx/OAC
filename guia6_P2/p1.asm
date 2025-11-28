@@ -17,9 +17,9 @@ section .data
 	strPrimo: db "Si es primo",10,0
 	strNoPrimo: db "No es primo",10,0
 
-	flag dd 0 ; inicializada en falso (flag de 1 byte)
-	temp dd 0 ; variable auxiliar para contar cuantos divisores propios tiene un numero
-	n dd 0    ; contador de primos encontrados
+	flag dd 0 ; 
+	temp dd 0 ; cuantos divisores propios tiene un numero
+	n dd 0    ; numero primo encontrado
 section .text
 
 global _start 
@@ -31,15 +31,11 @@ PutStr strProposito
 PutStr strIngreso
 GetLInt ebx
 
-; se va a hacer un bucle "infinito" (limite de 32 bits) hasta encontrar una 
-;el resultado booleano se almacena en una bandera
 PutStr strResultado
 call nPrimos
 
 
 fin:
-;PutLInt [temp]
-;PutInt [flag]
 	mov eax, 01
 	INT 80h
 
@@ -60,20 +56,17 @@ esPrimo:
 	mov esi,eax
 	sumar_divisores:
 	    CMP ECX, 0
-	    JE comprobacion       ; Terminar si llegamos a 0
+	    JE comprobacion;Terminar si llegamos a 0
 	
-	    MOV EAX, ESI             ; Número original
-	    XOR EDX, EDX             ; Limpiar EDX antes de DIV
-	    MOV EBX, ECX             ; Divisor candidato
-	    DIV EBX                  ; EAX / EBX → residuo en EDX
+	    MOV EAX, ESI; Número original
+	    XOR EDX, EDX; Limpiar edx
+	    MOV EBX, ECX; Divisor candidato
+	    DIV EBX 
 	
 	    CMP EDX, 0
 	    JNE continuar            ; Si no es divisible, seguir
 	
-	    ; Sumar contador (ESI)
 	    INC dword [temp]
-	    
-	
 	    continuar:
 	        DEC ECX
 	        JMP sumar_divisores
@@ -103,8 +96,6 @@ nPrimos:
 	jmp continuar1
 	siEs:
 	inc dword [n]
-	;PutLInt eax
-	;nwln
 
 	continuar1:
 		inc eax

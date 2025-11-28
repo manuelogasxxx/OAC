@@ -71,7 +71,6 @@ primerCiclo:
 	pop eax
 	cmp ecx,eax
 	JE siSon
-    ;calcular una ves los divisores de eax
 
 	noSon1:
 		inc eax

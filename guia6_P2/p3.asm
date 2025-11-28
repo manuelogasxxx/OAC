@@ -90,15 +90,16 @@ esAbundante:
     push ecx
     push edx
 
-    mov dword [suma], 0    ; limpiar suma
-    mov esi, eax           ; esi = número original
+    mov dword [suma], 0    
+    mov esi, eax           
     mov ecx, esi
-    dec ecx                ; divisor = n - 1
+    dec ecx                
 
 bucleSuma:
     cmp ecx, 0
     je finSuma
-    mov eax, esi           ; eax = número original ✅
+    ;eax es el valor original
+    mov eax, esi 
     xor edx, edx
     div ecx
     cmp edx, 0
@@ -137,17 +138,13 @@ bucleColumnasSuma:
     mov cx, [ebx + eax*2]
     movsx ecx, cx        ; extender a 32 bits
     ;
-    push eax             ; guardar índice lineal
-    mov eax, ecx         ; eax = número a verificar
+    push eax             
+    mov eax, ecx         
     
     call esAbundante
     
-    ; Mostrar resultados
-    ;call indices
-    ;PutInt ax
     cmp dword [flag], 1
     je esAb
-        ;PutStr strNoAbundante
     jmp sig
     esAb:
         mov dword [flag1],1
@@ -155,10 +152,9 @@ bucleColumnasSuma:
         PutInt ax
         PutStr strSiAbundante
         nwln
-    sig:
-        ;nwln        
-        pop eax              ; recuperar índice lineal
-        inc eax              ; siguiente elemento
+    sig:     
+        pop eax
+        inc eax
         inc word[j]
         mov cx, word[j]
         cmp cx, word[n]
