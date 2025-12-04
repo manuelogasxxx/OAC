@@ -37,10 +37,34 @@
     ;
     mov si, strIngresar
     call imprimirCadena
-    call esperarTecla
+    ;call esperarTecla
+    mov di, cadenaUsuario
+    call esperarTecla2
+    ;
+    mov si, strResultado
+    call imprimirCadena
+    ;
+    mov si, cadenaUsuario
+    call imprimirCadena
+    ;aqui se va a hacer la comparación
+    call compararCadenas
+    jz  .correcta
+    jmp .incorrecta
+
+    .correcta:
+        mov si, strOk
+        call imprimirCadena
+        jmp end
+
+    .incorrecta:
+        mov si, strNotOk
+        call imprimirCadena
+        jmp end
+
     mov si, strFinalizado
     call imprimirCadena
 end:
+    
     jmp end
 ;ciclo infinito
 
@@ -49,9 +73,15 @@ strBienvenida1 db "|------------------------|",13,10,0
 strBienvenida2 db "|-----Booteador BIOS-----|",13,10,0
 strBienvenida3 db "|------------------------|",13,10,0
 strFinalizado  db 13,10,"Programa finalizado......:)",13,10,0
-strIngresar    db "Pulse enter para salir::::",13,10,0
+strIngresar    db "Ingrese la contrasena::::",13,10,0
+strResultado   db 13,10,"Contraseña ingresada:::",13,10,0
+strOk          db 13,10,"Es correcta!",13,10,0
+strNotOk       db 13,10,"Es incorrecta!",13,10,0
 
-
+;buffer de datos
+MAX_LONGITUD equ 30
+cadenaUsuario  db 31 dup(0)
+PASSWORD       db "12345",0
 
 imprimirCadena:
     push ax
@@ -105,6 +135,7 @@ esperarTecla2:
 
         ;mostrar el caracter
         push ax
+        mov al,0x2A; asterisco
         mov ah,0x0E ; funcion E int 1
         mov bx,0x07
         int 0x10
@@ -127,6 +158,35 @@ esperarTecla2:
     popa
 
 ret
+
+compararCadenas:
+    pusha
+    ;punteros a las cadenas
+    mov si, cadenaUsuario
+    mov di, PASSWORD
+    .loop_comparacion:
+        lodsb; carga en AL [SI] y SI++
+        mov bl,[di]
+        ;comparar
+        cmp al,bl
+        jne .no_iguales
+        cmp al,0
+        je .iguales; si se llegó al final son iguales
+        inc di; incrementa el puntero de la contraseña
+        jmp .loop_comparacion
+        .iguales:
+            ;clc;clear carry flag
+            xor ax,ax ; poner en 1 ZF
+            cmp ax,0
+            jmp .fin_comparacion
+        .no_iguales:
+            ;stc;set carry flag
+            mov al,1
+            cmp al,0
+        .fin_comparacion:
+    popa
+ret 
+
 
 ;rellenar hasta 510 bytes con NOP (No operation)
 times 510-($-$$) db 144
