@@ -20,24 +20,27 @@
 [ORG 0x0]
 
 ;inicializador de segmentos
-    mov ax, 0x7c0          ;dirección de arranque
-    mov ds,ax
-    mov es,ax
-    mov ax,0x8000
-    mov ss,ax
-    mov sp,0xf000
+mov ax, 0x7c0          ;dirección de arranque
+mov ds,ax
+mov es,ax
+mov ax,0x8000
+mov ss,ax
+mov sp,0xf000
 
 ;mostrar mensajes
-    mov si, strBienvenida1
-    call imprimirCadena
-    mov si, strBienvenida2
-    call imprimirCadena
-    mov si, strBienvenida3
-    call imprimirCadena
-    ;
+mov si, strBienvenida1
+call imprimirCadena
+;
+mov si, strBienvenida2
+call imprimirCadena
+;
+mov si, strBienvenida3
+call imprimirCadena
+
+.bucle:
     mov si, strIngresar
     call imprimirCadena
-    ;call esperarTecla
+    ;se guarda en DI el inicio de la cadena a guardar
     mov di, cadenaUsuario
     call esperarTecla2
     ;
@@ -50,21 +53,20 @@
     call compararCadenas
     jz  .correcta
     jmp .incorrecta
-
+    
     .correcta:
         mov si, strOk
+        call imprimirCadena
+        mov si, strFinOk
         call imprimirCadena
         jmp end
 
     .incorrecta:
         mov si, strNotOk
         call imprimirCadena
-        jmp end
+        jmp .bucle
 
-    mov si, strFinalizado
-    call imprimirCadena
 end:
-    
     jmp end
 ;ciclo infinito
 
@@ -72,27 +74,36 @@ end:
 strBienvenida1 db "|------------------------|",13,10,0
 strBienvenida2 db "|-----Booteador BIOS-----|",13,10,0
 strBienvenida3 db "|------------------------|",13,10,0
-strFinalizado  db 13,10,"Programa finalizado......:)",13,10,0
 strIngresar    db "Ingrese la contrasena::::",13,10,0
-strResultado   db 13,10,"Contraseña ingresada:::",13,10,0
-strOk          db 13,10,"Es correcta!",13,10,0
-strNotOk       db 13,10,"Es incorrecta!",13,10,0
+strResultado   db 13,10,"Contrasena ingresada:::",13,10,0
+strOk          db 13,10,"Es correcta!...",13,10,0
+strNotOk       db 13,10,"Es incorrecta!...Pruebe de nuevo",13,10,0
+strFinOk       db 13,10,"Continuando operaciones....",13,10,0
 
 ;buffer de datos
+;equivalente a #define
 MAX_LONGITUD equ 30
+;31 bytes con caracter nulo
 cadenaUsuario  db 31 dup(0)
+;contraseña predefinida
 PASSWORD       db "12345",0
 
+;imprime una cadena iniciada en SI
 imprimirCadena:
     push ax
     push bx
     .ciclo:
+        ;Load String Byte
+        ;AL->[SI];SI++
         lodsb
-        cmp al,0        ;¿fin de linea?
+        ;¿fin de linea?
+        cmp al,0
         jz .final
-        mov ah,0x0E     ; número de interrupcion
-        mov bx,0x07     ; atributos de la impresion
-        int 0x10        ; interrupcion 10
+        ;interrupcion 0x10 funcion 0x0E
+        ;Teletype output 
+        mov ah,0x0E
+        ;mov bx,0x07
+        int 0x10
         jmp .ciclo 
     .final:
         pop bx
@@ -108,7 +119,7 @@ esperarTecla:
         push ax
         ;el caracter leido se guarda en AL
         mov ah,0x0E;teletype output
-        mov bx,0x07; bh página de video, BL color
+        ;mov bx,0x03; bh página de video, BL color
         int 0x10
         pop ax
         cmp al,0x0D; caracter enter
@@ -117,6 +128,7 @@ esperarTecla:
     pop ax
 ret
 
+;se guarda un máximo de 31 caracteres y se espera un "enter"
 esperarTecla2:
     ;guardar registros
     pusha
@@ -126,37 +138,38 @@ esperarTecla2:
         ;funcion 0 de la int 16
         mov ah,0x00
         int 0x16
-
+        ;caracter enter
         cmp al,0x0D
         je .final_lectura
-
+        ;fin de cadena
         cmp cx,0
         je .bucle_lectura
 
         ;mostrar el caracter
         push ax
-        mov al,0x2A; asterisco
-        mov ah,0x0E ; funcion E int 1
+        ;asterisco
+        mov al,0x2A
+        ; funcion 0x0E int 0x10
+        mov ah,0x0E 
         mov bx,0x07
         int 0x10
         pop ax
         
         ;almacenar el caracter
-        stosb;guarda en [DI] AL y DI++
+        ;[DI]->AL y DI++
+        stosb
     loop .bucle_lectura
 
     .final_lectura:
         mov al,0;caracter nulo
         stosb
-
         ;escribir nueva linea
-        mov al, 0x0A        ; Line Feed
+        mov al, 0x0A 
         mov ah, 0x0E
-        mov bx, 0x07
+        ;mov bx, 0x07
         int 0x10
-        
-    popa
 
+    popa
 ret
 
 compararCadenas:
