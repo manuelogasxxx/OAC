@@ -1,5 +1,5 @@
 ;Autores:           Manuel Fernández Mercado && Jeliel
-;nombre:            arranque.asm
+;nombre:            arranqueFinalV2.asm
 ;Propósito:         Hacer uso a interrupciones del BIOS en un dispositivo x86
 ;fecha de creación: 28/11/2025
 ;fecha de modi:	    28/11/2025
@@ -42,7 +42,7 @@ call imprimirCadena
     call imprimirCadena
     ;se guarda en DI el inicio de la cadena a guardar
     mov di, cadenaUsuario
-    call guardarCadena
+    call esperarTeclaConAtributo
     ;
     mov si, strResultado
     call imprimirCadena
@@ -129,46 +129,65 @@ esperarTecla:
 ret
 
 ;se guarda un máximo de 31 caracteres y se espera un "enter"
-guardarCadena:
-    ;guardar registros
+esperarTeclaConAtributo:
     pusha
-    mov cx, MAX_LONGITUD
-    ;leer caracter por caracter y guardarlo en memoria
-    .bucle_lectura:
-        ;funcion 0 de la int 16
-        mov ah,0x00
-        int 0x16
-        ;caracter enter
-        cmp al,0x0D
-        je .final_lectura
-        ;fin de cadena
-        cmp cx,0
-        je .bucle_lectura
+    mov cx, MAX_LONGITUD ; Contador de caracteres restantes
 
-        ;mostrar el caracter
-        push ax
-        ;asterisco
-        mov al,0x2A
-        ; funcion 0x0E int 0x10
-        mov ah,0x0E 
-        mov bx,0x07
-        int 0x10
-        pop ax
+    .bucle_lectura:
+        ; 1. Leer caracter de entrada
+        mov ah, 0x00 
+        int 0x16
+
+        cmp al, 0x0D  ; Caracter ENTER
+        je .final_lectura
         
-        ;almacenar el caracter
-        ;[DI]->AL y DI++
-        stosb
-    loop .bucle_lectura
+        ;Comprobar si se alcanzó la longitud máxima
+        cmp cx, 0
+        je .bucle_lectura ; Si ya está lleno, ignorar la tecla (excepto ENTER)
+
+        ;Obtener la posición actual del cursor (DH=fila, DL=columna)
+        mov ah, 0x03 ; Función 0x03 (Get Cursor Position)
+        mov bh, 0x00; pagina de video
+        int 0x10
+        push dx  ; Guardar DH/DL (posición actual)
+        
+        ;Almacenar el caracter real en el buffer
+        stosb ; [ES:DI] <- AL, DI++
+
+        ;Imprimir el asterisco con atributo (AH=0x09 NO avanza el cursor)
+        push ax ; Guardar el caracter leído
+        push cx
+        
+        mov al, 0x2A ; Caracter ASCII para '*'
+        mov ah, 0x09  ; Función 0x09 (Write Character and Attribute)
+        mov bl, 0x1C     ; Atributo: 0x1E (Yellow on Blue - Usado en tu código original)
+        mov cx, 0x01  ; Cantidad de caracteres (siempre 1)
+        mov bh, 0x00  ; Página de video 0
+        int 0x10
+        pop cx
+        pop ax ; Restaurar el caracter leído
+        
+        ;Reposicionar el cursor a la siguiente columna
+        pop dx ; Restaurar DH/DL (fila y columna anterior)
+        inc dl ; Avanzar la columna (DL)
+        mov ah, 0x02; Función 0x02 (Set Cursor Position)
+        mov bh, 0x00 ; Página de video 0
+        int 0x10
+
+        ;Decrementar el contador de longitud
+        loop .bucle_lectura ; Decrementa CX y salta si no es cero
 
     .final_lectura:
-        mov al,0;caracter nulo
-        stosb
-        ;escribir nueva linea
-        mov al, 0x0A 
+        ;Escribir el terminador nulo en el buffer
+        mov al, 0x00  ; Caracter nulo
+        stosb ; [ES:DI] <- AL, DI++
+        ;Escribir nueva línea para la siguiente impresión
+        mov al, 0x0D  ; Retorno de carro
         mov ah, 0x0E
-        ;mov bx, 0x07
         int 0x10
-
+        mov al, 0x0A  ; Nueva línea
+        mov ah, 0x0E
+        int 0x10
     popa
 ret
 
@@ -188,12 +207,11 @@ compararCadenas:
         inc di; incrementa el puntero de la contraseña
         jmp .loop_comparacion
         .iguales:
-            ;clc;clear carry flag
             xor ax,ax ; poner en 1 ZF
             cmp ax,0
             jmp .fin_comparacion
         .no_iguales:
-            ;stc;set carry flag
+            ;ZF=0
             mov al,1
             cmp al,0
         .fin_comparacion:
